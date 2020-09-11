@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Playlist</title>
+        <link rel="stylesheet" type="text/css" th:href="@{../css/style.css}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>Playlist</h1>
+        <h2> <a href="addSong">Add song</a> </h2> <br/>
+        <button id="delete">Delete</button> <br/><br/>
+        <div class="container">
+            <table class ="container" border="1">
+                <tr>
+                    <th><h1>Title</h1></th>
+                    <th><h1>Author</h1></th>
+                    <th><h1>Select to delete</h1></th>
+                </tr>
+                <tr th:each ="song: ${songs}">
+                    <td contenteditable="true" th:utext="${song.title}">...</td>
+                    <td contenteditable="true" th:utext="${song.author}">...</td>
+                    <td>
+                        <input type="radio" id="radio" th:value="${song}">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
+    <script>
+        let beforeChanges;
+        $('[contenteditable]').click(function(event) {
+            beforeChanges = event.target.innerText;
+            console.log(beforeChanges);
+        });
+
+        $('[contenteditable]').focusout(function(event) {
+            let changes = event.target.innerText;
+            if(beforeChanges !== changes) {
+                console.log(changes);
+                $.ajax({
+                    url: '/edit',
+                    type: 'PUT',
+                    data: { beforeChanges: beforeChanges, changes: changes}
+                });
+            }
+        });
+
+        $('#delete').click(function(){
+            $('input:radio:checked').each(function(){
+                $.ajax({
+                    url: '/deleteSong',
+                    type: 'DELETE',
+                    data: {song: $(this).val()}
+                });
+            });
+            window.location.reload();
+        });
+    </script>
+</html>
